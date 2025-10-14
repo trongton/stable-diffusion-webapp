@@ -145,24 +145,11 @@
                 <div class="card">
                     <h2>Generated Image</h2>
                     
-                    <!-- Generate Button -->
+                    <!-- Generate Button with inline spinner -->
                     <button id="generate-btn" class="btn-primary">
-                        🎨 Generate Image
+                        <span class="btn-spinner" id="btn-spinner" style="display: none;"></span>
+                        <span id="btn-text">🎨 Generate Image</span>
                     </button>
-                    
-                    <!-- Progress Bar -->
-                    <div id="progress-container" class="progress-container" style="display: none;">
-                        <div class="progress-info">
-                            <span id="progress-text">Generating...</span>
-                            <span id="progress-percentage">0%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div id="progress-fill" class="progress-fill"></div>
-                        </div>
-                        <div class="progress-steps">
-                            <span id="progress-steps-text">Step 0/20</span>
-                        </div>
-                    </div>
                     
                     <!-- Status -->
                     <div id="status" class="status"></div>

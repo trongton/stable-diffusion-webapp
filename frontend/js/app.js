@@ -24,11 +24,8 @@ const imageActions = document.getElementById('image-actions');
 const imageInfo = document.getElementById('image-info');
 const downloadBtn = document.getElementById('download-btn');
 const newGenerationBtn = document.getElementById('new-generation-btn');
-const progressContainer = document.getElementById('progress-container');
-const progressFill = document.getElementById('progress-fill');
-const progressText = document.getElementById('progress-text');
-const progressPercentage = document.getElementById('progress-percentage');
-const progressStepsText = document.getElementById('progress-steps-text');
+const btnSpinner = document.getElementById('btn-spinner');
+const btnText = document.getElementById('btn-text');
 
 // State
 let isGenerating = false;
@@ -151,11 +148,13 @@ async function handleGenerate() {
     // Start generation
     isGenerating = true;
     generateBtn.disabled = true;
-    generateBtn.textContent = 'Generating...';
     
-    // Show loading and progress bar
+    // Show inline spinner and update button text
+    btnSpinner.style.display = 'inline-block';
+    btnText.textContent = 'Generating...';
+    
+    // Show loading
     showLoading();
-    showProgressBar(params.num_inference_steps);
     showStatus('Generating image... This may take 30-60 seconds.', 'info');
     
     try {
@@ -200,33 +199,13 @@ async function handleGenerate() {
     } finally {
         isGenerating = false;
         generateBtn.disabled = false;
-        generateBtn.textContent = '🎨 Generate Image';
-        hideProgressBar();
+        
+        // Hide spinner and restore button text
+        btnSpinner.style.display = 'none';
+        btnText.textContent = '🎨 Generate Image';
     }
 }
 
-// Show Progress Bar
-function showProgressBar(totalSteps) {
-    progressContainer.style.display = 'block';
-    progressFill.style.width = '0%';
-    progressText.textContent = 'Initializing...';
-    progressPercentage.textContent = '0%';
-    progressStepsText.textContent = `Step 0/${totalSteps}`;
-}
-
-// Update Progress Bar
-function updateProgressBar(currentStep, totalSteps, message = 'Generating...') {
-    const percentage = Math.round((currentStep / totalSteps) * 100);
-    progressFill.style.width = `${percentage}%`;
-    progressText.textContent = message;
-    progressPercentage.textContent = `${percentage}%`;
-    progressStepsText.textContent = `Step ${currentStep}/${totalSteps}`;
-}
-
-// Hide Progress Bar
-function hideProgressBar() {
-    progressContainer.style.display = 'none';
-}
 
 // Generate temporary session ID
 function generateTempSessionId() {
@@ -262,7 +241,7 @@ function connectProgressStream(sessionId, totalSteps) {
                 console.log('Progress stream connected:', data.session_id);
             } else if (data.type === 'progress') {
                 console.log(`Progress: ${data.current_step}/${data.total_steps} (${data.percentage}%)`);
-                updateProgressBar(data.current_step, data.total_steps);
+                // Progress is now shown via the button spinner
             } else if (data.type === 'complete' || data.type === 'done') {
                 console.log('Progress stream complete');
                 progressEventSource.close();
