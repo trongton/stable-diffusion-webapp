@@ -68,9 +68,10 @@ function setupEventListeners() {
     const sizeRadios = document.querySelectorAll('input[name="image-size"]');
     sizeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
-            const size = e.target.value;
-            widthInput.value = size;
-            heightInput.value = size;
+            const width = e.target.dataset.width;
+            const height = e.target.dataset.height;
+            widthInput.value = width;
+            heightInput.value = height;
         });
     });
     
