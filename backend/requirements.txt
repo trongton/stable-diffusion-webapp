@@ -1,0 +1,20 @@
+Flask==2.3.3
+Flask-CORS==4.0.0
+diffusers==0.21.4
+transformers==4.35.2
+torch==2.1.1
+torchvision==0.16.1
+accelerate==0.24.1
+safetensors==0.4.0
+Pillow==10.1.0
+numpy==1.24.4
+requests==2.31.0
+python-dotenv==1.0.0
+gunicorn==21.2.0
+xformers==0.0.22.post7
+invisible-watermark==0.2.0
+
+# OpenVINO Support
+optimum-intel[openvino]>=1.25.0
+openvino>=2025.0.0
+openvino-tokenizers>=2025.0.0

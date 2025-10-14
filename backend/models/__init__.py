@@ -1,0 +1,4 @@
+from .sd_model import StableDiffusionModel
+from .sd_model_openvino import StableDiffusionModelOpenVINO
+
+__all__ = ['StableDiffusionModel', 'StableDiffusionModelOpenVINO']

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stable Diffusion Image Generator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎨 Stable Diffusion Image Generator</h1>
+            <p class="subtitle">Generate AI images from text descriptions</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel: Controls -->
+            <div class="controls-panel">
+                <!-- Device & Content Settings -->
+                <div class="card settings-card">
+                    <h2>⚙️ Device & Content Settings</h2>
+                    
+                    <!-- Device Selector -->
+                    <div class="form-group">
+                        <label>Processing Device</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="device" value="GPU" id="device-gpu" checked>
+                                <span>🚀 GPU (Faster)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="device" value="CPU" id="device-cpu">
+                                <span>💻 CPU (Slower)</span>
+                            </label>
+                        </div>
+                        <small id="device-status" class="device-status">Current: Loading...</small>
+                    </div>
+
+                    <!-- NSFW Toggle -->
+                    <div class="form-group nsfw-toggle">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="nsfw-enabled">
+                            <span>Allow NSFW Content</span>
+                        </label>
+                        <small class="warning">⚠️ Enable this to generate adult content without filtering</small>
+                    </div>
+                </div>
+
+                <!-- Prompts & Settings -->
+                <div class="card">
+                    <h2>🎨 Prompts & Settings</h2>
+                    
+                    <!-- Prompts Section -->
+                    <div class="prompts-section">
+                        <h3>Prompts</h3>
+                        <!-- Prompt Input -->
+                        <div class="form-group">
+                            <label for="prompt">Prompt *</label>
+                            <textarea 
+                                id="prompt" 
+                                rows="3" 
+                                placeholder="Describe the image you want to generate..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <!-- Negative Prompt -->
+                        <div class="form-group">
+                            <label for="negative-prompt">Negative Prompt</label>
+                            <textarea 
+                                id="negative-prompt" 
+                                rows="2" 
+                                placeholder="What to avoid (e.g., blurry, low quality)"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div class="settings-section">
+                        <h3>Generation Settings</h3>
+                        <!-- Dimensions -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="width">Width</label>
+                                <input type="number" id="width" value="512" min="256" max="1024" step="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="height">Height</label>
+                                <input type="number" id="height" value="512" min="256" max="1024" step="8">
+                            </div>
+                        </div>
+
+                        <!-- Quick Size Presets -->
+                        <div class="form-group">
+                            <label>Quick Presets</label>
+                            <div class="preset-buttons">
+                                <button class="btn-preset" data-width="512" data-height="512">Square (512x512)</button>
+                                <button class="btn-preset" data-width="768" data-height="512">Landscape (768x512)</button>
+                                <button class="btn-preset" data-width="512" data-height="768">Portrait (512x768)</button>
+                            </div>
+                        </div>
+
+                        <!-- Steps -->
+                        <div class="form-group">
+                            <label for="steps">
+                                Inference Steps: <span id="steps-value">20</span>
+                            </label>
+                            <input type="range" id="steps" min="10" max="100" value="20" step="1">
+                            <small>More steps = better quality but slower (20-50 recommended)</small>
+                        </div>
+
+                        <!-- Guidance Scale -->
+                        <div class="form-group">
+                            <label for="guidance">
+                                Guidance Scale: <span id="guidance-value">7.5</span>
+                            </label>
+                            <input type="range" id="guidance" min="1" max="20" value="7.5" step="0.5">
+                            <small>How closely to follow the prompt (7-12 recommended)</small>
+                        </div>
+
+                        <!-- Seed -->
+                        <div class="form-group">
+                            <label for="seed">Seed (optional)</label>
+                            <input type="number" id="seed" placeholder="Leave empty for random">
+                            <small>Use same seed for reproducible results</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Output -->
+            <div class="output-panel">
+                <!-- Generated Image -->
+                <div class="card">
+                    <h2>Generated Image</h2>
+                    
+                    <!-- Generate Button -->
+                    <button id="generate-btn" class="btn-primary">
+                        🎨 Generate Image
+                    </button>
+                    
+                    <!-- Progress Bar -->
+                    <div id="progress-container" class="progress-container" style="display: none;">
+                        <div class="progress-info">
+                            <span id="progress-text">Generating...</span>
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <span id="progress-steps-text">Step 0/20</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div id="status" class="status"></div>
+                    
+                    <!-- Image Display -->
+                    <div id="image-container" class="image-container">
+                        <div class="placeholder">
+                            <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                                <rect width="100" height="100" fill="#f0f0f0"/>
+                                <path d="M30 70L45 50L55 62L70 40L85 70Z" fill="#ccc"/>
+                                <circle cx="35" cy="30" r="8" fill="#ccc"/>
+                            </svg>
+                            <p>Your generated image will appear here</p>
+                        </div>
+                        <img id="generated-image" style="display: none;">
+                        
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" class="spinner" style="display: none;">
+                            <div class="spinner-circle"></div>
+                            <p>Generating image...</p>
+                        </div>
+                    </div>
+
+                    <!-- Image Actions -->
+                    <div id="image-actions" class="image-actions" style="display: none;">
+                        <button id="download-btn" class="btn-secondary">
+                            💾 Download
+                        </button>
+                        <button id="new-generation-btn" class="btn-secondary">
+                            🔄 Generate Another
+                        </button>
+                    </div>
+
+                    <!-- Image Info -->
+                    <div id="image-info" class="image-info" style="display: none;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
