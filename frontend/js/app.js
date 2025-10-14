@@ -155,7 +155,7 @@ async function handleGenerate() {
     
     // Show loading
     showLoading();
-    showStatus('Generating image... This may take 30-60 seconds.', 'info');
+    showStatus('Initializing...', 'info');
     
     try {
         // Generate a temporary session ID and connect to progress stream BEFORE starting generation
@@ -193,16 +193,15 @@ async function handleGenerate() {
         
     } catch (error) {
         console.error('Generation error:', error);
-        showStatus(`Error: ${error.message}`, 'error');
         hideLoading();
-        hideProgressBar();
+        showStatus(`Error: ${error.message}`, 'error');
     } finally {
         isGenerating = false;
         generateBtn.disabled = false;
         
         // Hide spinner and restore button text
         btnSpinner.style.display = 'none';
-        btnText.textContent = '🎨 Generate Image';
+        btnText.textContent = '🎨 Generate';
     }
 }
 
@@ -239,11 +238,13 @@ function connectProgressStream(sessionId, totalSteps) {
             
             if (data.type === 'connected') {
                 console.log('Progress stream connected:', data.session_id);
+                showStatus('Starting generation...', 'info');
             } else if (data.type === 'progress') {
                 console.log(`Progress: ${data.current_step}/${data.total_steps} (${data.percentage}%)`);
-                // Progress is now shown via the button spinner
+                showStatus(`Step ${data.current_step}/${data.total_steps} (${data.percentage}%)`, 'info');
             } else if (data.type === 'complete' || data.type === 'done') {
                 console.log('Progress stream complete');
+                showStatus('Finalizing...', 'info');
                 progressEventSource.close();
                 progressEventSource = null;
             }
@@ -333,7 +334,7 @@ function handleNewGeneration() {
     
     // Clear status
     statusDiv.textContent = '';
-    statusDiv.className = 'status';
+    statusDiv.className = 'status status-inline';
     
     // Focus on prompt
     promptInput.focus();
@@ -342,13 +343,13 @@ function handleNewGeneration() {
 // Show Status Message
 function showStatus(message, type = 'info') {
     statusDiv.textContent = message;
-    statusDiv.className = `status ${type}`;
+    statusDiv.className = `status status-inline ${type}`;
     
     // Auto-hide after 5 seconds for success messages
     if (type === 'success') {
         setTimeout(() => {
             statusDiv.textContent = '';
-            statusDiv.className = 'status';
+            statusDiv.className = 'status status-inline';
         }, 5000);
     }
 }

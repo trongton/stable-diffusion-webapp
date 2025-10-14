@@ -605,11 +605,26 @@ input[type="range"]::-moz-range-thumb {
     font-weight: 600;
 }
 
-/* Generate Button in Output Panel */
-.output-panel .btn-primary {
+/* Generate Button and Status Row */
+.generate-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 15px;
-    font-size: 1.1rem;
-    padding: 14px 24px;
+}
+
+/* Compact Generate Button */
+.btn-compact {
+    font-size: 0.95rem;
+    padding: 10px 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Make button take less space */
+.generate-row .btn-primary {
+    width: auto;
+    min-width: 140px;
 }
 
 
@@ -622,6 +637,26 @@ input[type="range"]::-moz-range-thumb {
     text-align: center;
     font-weight: 600;
     min-height: 20px;
+}
+
+/* Inline Status (next to button) */
+.status-inline {
+    flex: 1;
+    margin: 0;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    min-height: auto;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    font-weight: 500;
+}
+
+.status-inline:empty {
+    display: none;
 }
 
 .status.success {
@@ -640,6 +675,25 @@ input[type="range"]::-moz-range-thumb {
     background: #d1ecf1;
     color: #0c5460;
     border: 1px solid #bee5eb;
+}
+
+/* Inline status colors */
+.status-inline.info {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.status-inline.success {
+    color: #155724;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.status-inline.error {
+    color: #721c24;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
 }
 
 /* Image Container */

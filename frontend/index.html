@@ -145,14 +145,14 @@
                 <div class="card">
                     <h2>Generated Image</h2>
                     
-                    <!-- Generate Button with inline spinner -->
-                    <button id="generate-btn" class="btn-primary">
-                        <span class="btn-spinner" id="btn-spinner" style="display: none;"></span>
-                        <span id="btn-text">🎨 Generate Image</span>
-                    </button>
-                    
-                    <!-- Status -->
-                    <div id="status" class="status"></div>
+                    <!-- Generate Button and Status Row -->
+                    <div class="generate-row">
+                        <button id="generate-btn" class="btn-primary btn-compact">
+                            <span class="btn-spinner" id="btn-spinner" style="display: none;"></span>
+                            <span id="btn-text">🎨 Generate</span>
+                        </button>
+                        <div id="status" class="status status-inline"></div>
+                    </div>
                     
                     <!-- Image Display -->
                     <div id="image-container" class="image-container">
