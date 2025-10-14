@@ -64,14 +64,13 @@ function setupEventListeners() {
     // New generation button
     newGenerationBtn.addEventListener('click', handleNewGeneration);
     
-    // Preset buttons
-    const presetButtons = document.querySelectorAll('.btn-preset');
-    presetButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const width = e.target.dataset.width;
-            const height = e.target.dataset.height;
-            widthInput.value = width;
-            heightInput.value = height;
+    // Image size radio buttons
+    const sizeRadios = document.querySelectorAll('input[name="image-size"]');
+    sizeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const size = e.target.value;
+            widthInput.value = size;
+            heightInput.value = size;
         });
     });
     

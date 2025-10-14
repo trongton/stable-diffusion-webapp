@@ -92,13 +92,22 @@
                             </div>
                         </div>
 
-                        <!-- Quick Size Presets -->
+                        <!-- Image Size Selection -->
                         <div class="form-group">
-                            <label>Quick Presets</label>
-                            <div class="preset-buttons">
-                                <button class="btn-preset" data-width="512" data-height="512">Square (512x512)</button>
-                                <button class="btn-preset" data-width="768" data-height="512">Landscape (768x512)</button>
-                                <button class="btn-preset" data-width="512" data-height="768">Portrait (512x768)</button>
+                            <label>Image Size</label>
+                            <div class="radio-group size-radio-group">
+                                <label class="radio-label size-option">
+                                    <input type="radio" name="image-size" value="512" checked>
+                                    <span>📱 Small<br><small>512x512</small></span>
+                                </label>
+                                <label class="radio-label size-option">
+                                    <input type="radio" name="image-size" value="1024">
+                                    <span>🖥️ Medium<br><small>1024x1024</small></span>
+                                </label>
+                                <label class="radio-label size-option">
+                                    <input type="radio" name="image-size" value="2048">
+                                    <span>🖼️ Large<br><small>2048x2048</small></span>
+                                </label>
                             </div>
                         </div>
 
