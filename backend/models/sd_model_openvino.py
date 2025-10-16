@@ -296,8 +296,14 @@ class StableDiffusionModelOpenVINO:
                         def progress_callback(step, timestep, latents):
                             try:
                                 callback(step, num_inference_steps)
+                            except StopIteration:
+                                # Re-raise StopIteration to stop generation
+                                print(f"[STOP] StopIteration caught in callback, propagating...")
+                                raise
                             except Exception as e:
                                 print(f"Error in callback: {e}")
+                                # Don't suppress other exceptions
+                                raise
                         pipe_callback = progress_callback
                     else:
                         print("No callback provided (OpenVINO)")
@@ -323,6 +329,12 @@ class StableDiffusionModelOpenVINO:
                     self._cleanup_gpu_memory()
                     
                     return image
+                    
+                except StopIteration as e:
+                    # Stop requested by user, clean up and re-raise
+                    print(f"[STOP] Generation stopped by user")
+                    self._cleanup_gpu_memory()
+                    raise
                     
                 except Exception as e:
                     error_str = str(e).lower()

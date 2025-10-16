@@ -176,8 +176,9 @@ def generate_image():
         def progress_callback(step, total):
             # Check if we should stop
             if progress_data['should_stop']:
-                print(f"[CALLBACK] Stop requested, raising exception")
-                raise Exception("Generation stopped by user")
+                print(f"[CALLBACK] Stop requested at step {step + 1}/{total}, raising StopIteration")
+                # Use StopIteration instead of Exception for cleaner stop
+                raise StopIteration("Generation stopped by user")
             
             progress_data['current_step'] = step + 1  # step is 0-indexed
             progress_data['total_steps'] = total
@@ -237,6 +238,19 @@ def generate_image():
             }
         })
         
+    except StopIteration as e:
+        print(f"[STOP] Generation stopped: {e}")
+        
+        # Mark generation as complete
+        progress_data['is_generating'] = False
+        progress_data['should_stop'] = False
+        
+        return jsonify({
+            'success': False,
+            'stopped': True,
+            'error': 'Generation stopped by user'
+        }), 200
+        
     except Exception as e:
         print(f"Error in generate_image: {e}")
         import traceback
@@ -244,6 +258,7 @@ def generate_image():
         
         # Mark generation as complete even on error
         progress_data['is_generating'] = False
+        progress_data['should_stop'] = False
         
         return jsonify({
             'success': False,
