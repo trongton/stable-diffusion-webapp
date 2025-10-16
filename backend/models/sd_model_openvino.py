@@ -104,11 +104,15 @@ class StableDiffusionModelOpenVINO:
             print(f"Available devices: {self.get_available_devices()}")
             
         except Exception as e:
-            print(f"Error loading model: {e}")
+            print(f"[ERROR] Error loading model on {self.device}: {e}")
+            import traceback
+            print("[ERROR] Full traceback:")
+            traceback.print_exc()
             
             # If GPU failed, try fallback to CPU
             if self.device.upper() != 'CPU' and not self._gpu_failed:
                 print(f"[GPU] Model loading failed on {self.device}, attempting CPU fallback...")
+                print(f"[GPU] Error was: {str(e)[:200]}")
                 self.device = 'CPU'
                 self._gpu_failed = True
                 try:
