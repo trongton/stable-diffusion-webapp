@@ -147,7 +147,9 @@ def generate_image():
         def progress_callback(step, total):
             progress_data['current_step'] = step + 1  # step is 0-indexed
             progress_data['total_steps'] = total
-            print(f"Progress callback: step {step + 1}/{total}")
+            print(f"[CALLBACK] Progress callback invoked: step {step + 1}/{total}, session_id: {session_id}")
+        
+        print(f"[DEBUG] Progress callback function created, passing to model.generate_image()")
         
         # Start timing
         start_time = time.time()

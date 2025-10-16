@@ -134,9 +134,15 @@ class StableDiffusionModelOpenVINO:
             # Prepare callback if provided
             pipe_callback = None
             if callback:
+                print(f"Callback registered for progress tracking (OpenVINO)")
                 def progress_callback(step, timestep, latents):
-                    callback(step, num_inference_steps)
+                    try:
+                        callback(step, num_inference_steps)
+                    except Exception as e:
+                        print(f"Error in callback: {e}")
                 pipe_callback = progress_callback
+            else:
+                print("No callback provided (OpenVINO)")
             
             result = self.pipe(
                 prompt=prompt,
@@ -146,8 +152,8 @@ class StableDiffusionModelOpenVINO:
                 num_inference_steps=num_inference_steps,
                 guidance_scale=guidance_scale,
                 generator=generator,
-                callback=pipe_callback,
-                callback_steps=1
+                callback=pipe_callback if pipe_callback else None,
+                callback_steps=1 if pipe_callback else None
             )
             
             gen_time = time.time() - gen_start
