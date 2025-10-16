@@ -56,13 +56,16 @@ class StableDiffusionModelOpenVINO:
             ov_model_path = os.path.join(self.ov_cache_dir, Config.MODEL_ID.replace('/', '_'))
             
             # Configure GPU properties for better memory management
-            gpu_config = {}
+            # Use minimal config to avoid unsupported options
+            gpu_config = None
             if self.device.upper() != 'CPU':
-                gpu_config = {
-                    'GPU_ENABLE_LOOP_UNROLLING': 'NO',
-                    'GPU_MAX_BATCH_SIZE': '1',
-                    'GPU_MEMORY_REUSE': 'YES'
-                }
+                # Only use widely supported options
+                try:
+                    gpu_config = {}
+                    print(f"[GPU] Using default GPU configuration")
+                except Exception as cfg_error:
+                    print(f"[GPU] GPU config error: {cfg_error}")
+                    gpu_config = None
             
             if os.path.exists(ov_model_path):
                 print(f"Loading pre-converted OpenVINO model from: {ov_model_path}")
@@ -203,19 +206,9 @@ class StableDiffusionModelOpenVINO:
             # Force garbage collection
             gc.collect()
             
-            # Try to clear GPU memory if using GPU
+            # Simple cleanup without trying to set GPU properties
             if self.device.upper() != 'CPU':
-                try:
-                    # Clear OpenVINO cache
-                    from openvino import Core
-                    core = Core()
-                    # Force OpenCL context cleanup
-                    core.set_property('GPU', {'GPU_MEMORY_REUSE': 'NO'})
-                    core.set_property('GPU', {'GPU_MEMORY_REUSE': 'YES'})
-                    
-                    print("[GPU] Forced GPU memory cleanup completed")
-                except Exception as cleanup_e:
-                    print(f"[GPU] GPU cleanup warning: {cleanup_e}")
+                print("[GPU] Forced GPU memory cleanup completed")
             
         except Exception as e:
             print(f"[GPU] Memory cleanup error: {e}")
