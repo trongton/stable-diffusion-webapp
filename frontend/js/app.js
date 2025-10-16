@@ -1,7 +1,8 @@
 // Copyright 2025 by trongton@gmail.com
 
 // Configuration
-const API_BASE_URL = 'http://localhost:5000';
+// Use the same host as the current page, so it works with both localhost and IP addresses
+const API_BASE_URL = window.location.origin;
 
 // DOM Elements
 const promptInput = document.getElementById('prompt');
