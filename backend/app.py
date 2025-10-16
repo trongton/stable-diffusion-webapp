@@ -60,7 +60,10 @@ def api_info():
 @app.route('/api/progress/<session_id>')
 def stream_progress(session_id):
     """Stream generation progress via Server-Sent Events"""
+    print(f"[SSE] Progress stream connection requested for session: {session_id}")
+    
     def generate():
+        print(f"[SSE] Starting SSE generator for session: {session_id}")
         # Send initial connection message
         yield f"data: {json.dumps({'type': 'connected', 'session_id': session_id})}\n\n"
         
@@ -82,19 +85,43 @@ def stream_progress(session_id):
                         'total_steps': total_steps,
                         'percentage': percentage
                     }
+                    print(f"[SSE] Sending progress: {current_step}/{total_steps} ({percentage}%)")
                     yield f"data: {json.dumps(data)}\n\n"
                 
                 # Check if completed
                 if not progress_data['is_generating'] and current_step >= total_steps:
+                    print(f"[SSE] Generation complete, sending complete message")
                     yield f"data: {json.dumps({'type': 'complete'})}\n\n"
                     break
             
             time.sleep(0.1)  # Check every 100ms
         
         # Send done message
+        print(f"[SSE] Stream ending, sending done message")
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
     
-    return Response(stream_with_context(generate()), mimetype='text/event-stream')
+    response = Response(stream_with_context(generate()), mimetype='text/event-stream')
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['X-Accel-Buffering'] = 'no'
+    return response
+
+@app.route('/api/progress-poll/<session_id>', methods=['GET'])
+def poll_progress(session_id):
+    """Poll-based progress endpoint as fallback for SSE"""
+    if progress_data['session_id'] == session_id:
+        return jsonify({
+            'current_step': progress_data['current_step'],
+            'total_steps': progress_data['total_steps'],
+            'is_generating': progress_data['is_generating'],
+            'percentage': int((progress_data['current_step'] / progress_data['total_steps'] * 100)) if progress_data['total_steps'] > 0 else 0
+        })
+    else:
+        return jsonify({
+            'current_step': 0,
+            'total_steps': 0,
+            'is_generating': False,
+            'percentage': 0
+        })
 
 @app.route('/api/generate', methods=['POST'])
 def generate_image():
