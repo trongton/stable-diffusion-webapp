@@ -184,7 +184,19 @@ async function handleGenerate() {
         
         const data = await response.json();
         
+        console.log('[IMAGE] Response received:', {
+            success: data.success,
+            hasImageData: !!data.image_data,
+            imageDataLength: data.image_data ? data.image_data.length : 0,
+            generationTime: data.generation_time
+        });
+        
         if (data.success) {
+            if (!data.image_data) {
+                console.error('[IMAGE] No image data in response!');
+                throw new Error('No image data received from server');
+            }
+            console.log('[IMAGE] Displaying image...');
             displayGeneratedImage(data.image_data, data.parameters, data.generation_time);
             lastGeneratedImageData = data.image_data;
             lastParameters = data.parameters;
@@ -285,7 +297,20 @@ function hideLoading() {
 
 // Display Generated Image
 function displayGeneratedImage(imageData, parameters, generationTime) {
+    console.log('[IMAGE] displayGeneratedImage called');
+    console.log('[IMAGE] imageData prefix:', imageData.substring(0, 50));
+    
     hideLoading();
+    
+    // Set image source and add load/error handlers
+    generatedImage.onload = () => {
+        console.log('[IMAGE] Image loaded successfully');
+    };
+    
+    generatedImage.onerror = (e) => {
+        console.error('[IMAGE] Error loading image:', e);
+        showStatus('Error displaying image', 'error');
+    };
     
     generatedImage.src = imageData;
     generatedImage.style.display = 'block';
