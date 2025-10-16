@@ -232,6 +232,12 @@ def generate_image():
         
     except Exception as e:
         print(f"Error in generate_image: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Mark generation as complete even on error
+        progress_data['is_generating'] = False
+        
         return jsonify({
             'success': False,
             'error': str(e)
@@ -386,8 +392,10 @@ if __name__ == '__main__':
     # Uncomment the next line to preload:
     # sd_model.load_model()
     
+    # Run with increased timeout for long-running requests
     app.run(
         host=Config.HOST,
         port=Config.PORT,
-        debug=Config.DEBUG
+        debug=Config.DEBUG,
+        threaded=True  # Enable threading for concurrent requests
     )
