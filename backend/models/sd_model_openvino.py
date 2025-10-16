@@ -160,11 +160,26 @@ class StableDiffusionModelOpenVINO:
             image = result.images[0]
             print(f"Image generated successfully with OpenVINO in {gen_time:.2f} seconds!")
             print(f"Performance: {num_inference_steps/gen_time:.2f} steps/sec")
+            
+            # Clean up GPU memory to prevent CL_OUT_OF_RESOURCES
+            self._cleanup_gpu_memory()
+            
             return image
             
         except Exception as e:
             print(f"Error generating image: {e}")
+            # Try to clean up even on error
+            self._cleanup_gpu_memory()
             raise
+    
+    def _cleanup_gpu_memory(self):
+        """Clean up GPU memory after generation to prevent CL_OUT_OF_RESOURCES errors"""
+        try:
+            import gc
+            gc.collect()
+            print("[GPU] Memory cleanup completed")
+        except Exception as e:
+            print(f"[GPU] Error during memory cleanup: {e}")
     
     def image_to_base64(self, image):
         """Convert PIL Image to base64 string"""
