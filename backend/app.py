@@ -37,7 +37,8 @@ progress_data = {
     'current_step': 0,
     'total_steps': 0,
     'is_generating': False,
-    'session_id': None
+    'session_id': None,
+    'should_stop': False
 }
 
 @app.route('/')
@@ -169,9 +170,15 @@ def generate_image():
         progress_data['total_steps'] = num_inference_steps
         progress_data['is_generating'] = True
         progress_data['session_id'] = session_id
+        progress_data['should_stop'] = False
         
         # Define progress callback
         def progress_callback(step, total):
+            # Check if we should stop
+            if progress_data['should_stop']:
+                print(f"[CALLBACK] Stop requested, raising exception")
+                raise Exception("Generation stopped by user")
+            
             progress_data['current_step'] = step + 1  # step is 0-indexed
             progress_data['total_steps'] = total
             print(f"[CALLBACK] Progress callback invoked: step {step + 1}/{total}, session_id: {session_id}")
@@ -238,6 +245,30 @@ def generate_image():
         # Mark generation as complete even on error
         progress_data['is_generating'] = False
         
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/stop/<session_id>', methods=['POST'])
+def stop_generation(session_id):
+    """Stop the current generation"""
+    try:
+        if progress_data['session_id'] == session_id and progress_data['is_generating']:
+            print(f"[STOP] Stop requested for session: {session_id}")
+            progress_data['should_stop'] = True
+            progress_data['is_generating'] = False
+            return jsonify({
+                'success': True,
+                'message': 'Generation stop requested'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No active generation for this session'
+            })
+    except Exception as e:
+        print(f"Error stopping generation: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -334,10 +365,14 @@ def device_control():
             
             print(f"Switching device from {sd_model.device} to {new_device}")
             
-            # Unload current model
+            # Unload current model with proper cleanup
             if sd_model.model_loaded:
                 print("Unloading current model...")
-                sd_model.unload_model()
+                try:
+                    sd_model.unload_model()
+                except Exception as unload_error:
+                    print(f"Warning: Error during model unloading: {unload_error}")
+                    # Continue with device switch even if unload fails
             
             # Update device
             sd_model.device = new_device
@@ -346,12 +381,30 @@ def device_control():
             # Reinitialize model with new device
             if Config.USE_OPENVINO:
                 from models import StableDiffusionModelOpenVINO
+                old_model = sd_model
                 sd_model = StableDiffusionModelOpenVINO()
                 sd_model.device = new_device
+                
+                # Clean up old model reference
+                try:
+                    del old_model
+                except Exception:
+                    pass
             else:
                 from models import StableDiffusionModel
+                old_model = sd_model
                 sd_model = StableDiffusionModel()
                 sd_model.device = new_device
+                
+                # Clean up old model reference
+                try:
+                    del old_model
+                except Exception:
+                    pass
+            
+            # Force garbage collection after device switch
+            import gc
+            gc.collect()
             
             print(f"Device switched to {new_device}. Model will be loaded on next generation.")
             

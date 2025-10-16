@@ -13,8 +13,8 @@ class Config:
     USE_OPENVINO = os.getenv('USE_OPENVINO', 'True').lower() == 'true'
     
     # Set default device based on backend
-    # For OpenVINO: GPU (Intel GPU), for PyTorch: cuda (NVIDIA GPU)
-    _default_device = 'GPU' if USE_OPENVINO else 'cuda'
+    # Default to CPU for stability, users can switch to GPU via API
+    _default_device = 'CPU' if USE_OPENVINO else 'cpu'
     DEVICE = os.getenv('DEVICE', _default_device)
     
     # Server settings

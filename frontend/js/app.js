@@ -27,6 +27,7 @@ const imageActions = document.getElementById('image-actions');
 const imageInfo = document.getElementById('image-info');
 const downloadBtn = document.getElementById('download-btn');
 const newGenerationBtn = document.getElementById('new-generation-btn');
+const stopBtn = document.getElementById('stop-btn');
 const btnSpinner = document.getElementById('btn-spinner');
 const btnText = document.getElementById('btn-text');
 
@@ -35,6 +36,7 @@ let isGenerating = false;
 let lastGeneratedImageData = null;
 let lastParameters = null;
 let progressEventSource = null;
+let currentSessionId = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,6 +96,9 @@ function setupEventListeners() {
             switchDevice('CPU');
         }
     });
+    
+    // Stop button
+    stopBtn.addEventListener('click', handleStop);
 }
 
 // Check API Health
@@ -152,9 +157,9 @@ async function handleGenerate() {
     isGenerating = true;
     generateBtn.disabled = true;
     
-    // Show inline spinner and update button text
-    btnSpinner.style.display = 'inline-block';
-    btnText.textContent = 'Generating...';
+    // Show stop button and hide generate button
+    generateBtn.style.display = 'none';
+    stopBtn.style.display = 'block';
     
     // Show loading
     showLoading();
@@ -163,6 +168,7 @@ async function handleGenerate() {
     try {
         // Generate a temporary session ID and connect to progress stream BEFORE starting generation
         const tempSessionId = generateTempSessionId();
+        currentSessionId = tempSessionId;
         connectProgressStream(tempSessionId, params.num_inference_steps);
         
         // Add session_id to params so backend uses it
@@ -213,10 +219,58 @@ async function handleGenerate() {
     } finally {
         isGenerating = false;
         generateBtn.disabled = false;
+        currentSessionId = null;
         
-        // Hide spinner and restore button text
-        btnSpinner.style.display = 'none';
-        btnText.textContent = '🎨 Generate';
+        // Show generate button and hide stop button
+        generateBtn.style.display = 'block';
+        stopBtn.style.display = 'none';
+    }
+}
+
+// Handle Stop
+async function handleStop() {
+    if (!isGenerating || !currentSessionId) {
+        return;
+    }
+    
+    console.log('[STOP] Stopping generation for session:', currentSessionId);
+    showStatus('Stopping generation...', 'info');
+    stopBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/stop/${currentSessionId}`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showStatus('⛔ Generation stopped', 'info');
+            console.log('[STOP] Generation stopped successfully');
+        } else {
+            showStatus('Failed to stop generation', 'error');
+        }
+        
+        // Close progress stream
+        if (progressEventSource) {
+            progressEventSource.close();
+            progressEventSource = null;
+        }
+        
+        hideLoading();
+        
+    } catch (error) {
+        console.error('[STOP] Error stopping generation:', error);
+        showStatus('Error stopping generation', 'error');
+    } finally {
+        stopBtn.disabled = false;
+        isGenerating = false;
+        currentSessionId = null;
+        
+        // Show generate button and hide stop button
+        generateBtn.style.display = 'block';
+        generateBtn.disabled = false;
+        stopBtn.style.display = 'none';
     }
 }
 
