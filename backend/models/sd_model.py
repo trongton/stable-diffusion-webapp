@@ -1,3 +1,5 @@
+# Copyright 2025 by trongton@gmail.com
+
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from PIL import Image

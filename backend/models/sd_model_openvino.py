@@ -1,3 +1,5 @@
+# Copyright 2025 by trongton@gmail.com
+
 import torch
 from optimum.intel.openvino import OVStableDiffusionPipeline
 from PIL import Image

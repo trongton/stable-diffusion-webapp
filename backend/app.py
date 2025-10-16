@@ -1,3 +1,5 @@
+# Copyright 2025 by trongton@gmail.com
+
 from flask import Flask, request, jsonify, send_file, Response, stream_with_context
 from flask_cors import CORS
 import os

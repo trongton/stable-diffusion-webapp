@@ -1,3 +1,5 @@
+# Copyright 2025 by trongton@gmail.com
+
 import os
 from dotenv import load_dotenv
 

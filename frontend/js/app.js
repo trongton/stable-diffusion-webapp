@@ -1,3 +1,5 @@
+// Copyright 2025 by trongton@gmail.com
+
 // Configuration
 const API_BASE_URL = 'http://localhost:5000';
 
