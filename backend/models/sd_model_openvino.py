@@ -126,29 +126,45 @@ class StableDiffusionModelOpenVINO:
             core = Core()
             available_devices = core.available_devices
             
+            print(f"[GPU] Available OpenVINO devices: {available_devices}")
+            print(f"[GPU] Requested device: {self.device}")
+            
             gpu_device = self.device.upper()
-            if gpu_device not in available_devices and not any(d.startswith('GPU') for d in available_devices):
-                print(f"[GPU] Warning: {gpu_device} not found in available devices: {available_devices}")
+            
+            # Check if any GPU device is available
+            has_gpu = any(d.startswith('GPU') for d in available_devices)
+            
+            if not has_gpu:
+                print(f"[GPU] ERROR: No GPU devices found!")
+                print(f"[GPU] Available devices: {available_devices}")
+                print(f"[GPU] Make sure Intel GPU drivers and OpenVINO GPU plugin are installed")
                 print(f"[GPU] Falling back to CPU")
                 self.device = 'CPU'
                 self._gpu_failed = True
                 return False
             
-            # Test basic GPU functionality
-            try:
-                # Create a simple test to ensure GPU can be used
-                core.set_property('GPU', {'GPU_ENABLE_LOOP_UNROLLING': 'NO'})
-                print(f"[GPU] Device {gpu_device} validated successfully")
-                return True
-            except Exception as e:
-                print(f"[GPU] GPU functionality test failed: {e}")
-                print(f"[GPU] Falling back to CPU")
-                self.device = 'CPU'
-                self._gpu_failed = True
-                return False
+            # If specific GPU.X requested, check if it exists
+            if gpu_device not in available_devices:
+                # Try to use first available GPU
+                gpu_devices = [d for d in available_devices if d.startswith('GPU')]
+                if gpu_devices:
+                    print(f"[GPU] {gpu_device} not found, using {gpu_devices[0]} instead")
+                    self.device = gpu_devices[0]
+                    gpu_device = self.device
+                else:
+                    print(f"[GPU] No GPU devices available, falling back to CPU")
+                    self.device = 'CPU'
+                    self._gpu_failed = True
+                    return False
+            
+            print(f"[GPU] Using device: {self.device}")
+            print(f"[GPU] GPU validation successful")
+            return True
                 
         except Exception as e:
-            print(f"[GPU] GPU validation failed: {e}")
+            print(f"[GPU] GPU validation failed with exception: {e}")
+            import traceback
+            traceback.print_exc()
             print(f"[GPU] Falling back to CPU")
             self.device = 'CPU'
             self._gpu_failed = True
