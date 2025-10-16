@@ -72,6 +72,13 @@ body::before {
     font-weight: 500;
 }
 
+.copyright {
+    font-size: 0.75rem;
+    opacity: 0.85;
+    font-weight: 400;
+    margin-top: 5px;
+}
+
 /* Main Content */
 .main-content {
     display: grid;
