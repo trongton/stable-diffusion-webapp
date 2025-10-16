@@ -1,6 +1,6 @@
 # Copyright 2025 by trongton@gmail.com
 
-from flask import Flask, request, jsonify, send_file, Response, stream_with_context
+from flask import Flask, request, jsonify, send_file, Response, stream_with_context, send_from_directory
 from flask_cors import CORS
 import os
 import uuid
@@ -12,7 +12,9 @@ from models import StableDiffusionModel, StableDiffusionModelOpenVINO
 import threading
 
 # Initialize Flask app
-app = Flask(__name__)
+# Set the frontend directory as the static folder
+frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 CORS(app)  # Enable CORS for frontend requests
 
 # Initialize configuration
@@ -40,7 +42,12 @@ progress_data = {
 
 @app.route('/')
 def home():
-    """API home route"""
+    """Serve the main index page"""
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/api')
+def api_info():
+    """API info route"""
     return jsonify({
         'status': 'online',
         'message': 'Stable Diffusion API',
